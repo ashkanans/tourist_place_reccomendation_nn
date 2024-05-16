@@ -1,3 +1,5 @@
+import time
+
 import requests
 
 from database.places_dao import PlacesDAO
@@ -135,7 +137,7 @@ def main():
                                                                          travel_mode)
             RoutesDAO().insert_route(PlacesDAO().read_id_by_location(str(origin)),
                                      PlacesDAO().read_id_by_location(str(dest)), distance, duration, polyline)
-
+            time.sleep(3)
 
 if __name__ == "__main__":
     main()
