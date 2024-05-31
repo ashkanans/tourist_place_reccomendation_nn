@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 
 
@@ -15,7 +16,8 @@ class RoutesDAO:
                             destId TEXT,
                             distanceMeters INTEGER,
                             duration TEXT,
-                            encodedPolyline TEXT
+                            encodedPolyline TEXT,
+                            created_at TEXT
                         )''')
 
         conn.commit()
@@ -29,12 +31,12 @@ class RoutesDAO:
         cursor.execute('''SELECT * FROM routes WHERE originId = ? AND destId = ?''', (originId, destId,))
         existing_row = cursor.fetchone()
 
+        created_at = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if existing_row is None:
             # Insert route data into routes table
-            cursor.execute('''INSERT INTO routes (originId, destId, distanceMeters, duration, encodedPolyline)
-                              VALUES (?, ?, ?, ?, ?)''',
-                           (originId, destId, distance_meters, duration, encoded_polyline))
-
+            cursor.execute('''INSERT INTO routes (originId, destId, distanceMeters, duration, encodedPolyline, created_at)
+                              VALUES (?, ?, ?, ?, ?, ?)''',
+                           (originId, destId, distance_meters, duration, encoded_polyline, created_at))
         else:
             print(f"Row with originId: {originId} and destId: {destId} already exists, skipping insertion.")
 

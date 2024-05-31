@@ -124,20 +124,33 @@ class GoogleMaps:
 
 def main():
     travel_mode = "WALK"
-    api_key = "AIzaSyCGygp0SRJldfPq7nWt7kPNtaJ168VZH7E"  # Replace "YOUR_API_KEY" with your actual Google Maps API key
+    api_key = "AIzaSyCGygp0SRJldfPq7nWt7kPNtaJ168VZH7E"  # Replace with your actual Google Maps API key
     google_maps = GoogleMaps(api_key)
-    # google_maps.search_text(text_query, page_size, None)
-    
+
+    RoutesDAO().create_table()
     origins = PlacesDAO().read_all_locations()
     dests = PlacesDAO().read_all_locations()
-    for origin in origins:
-        for dest in dests:
-            distance, duration, polyline = google_maps.get_distance_time(origin['latitude'], origin['longitude'],
-                                                                         dest['latitude'], dest['longitude'],
-                                                                         travel_mode)
-            RoutesDAO().insert_route(PlacesDAO().read_id_by_location(str(origin)),
-                                     PlacesDAO().read_id_by_location(str(dest)), distance, duration, polyline)
-            time.sleep(3)
+
+    # Set the starting indices
+    origin_start_index = 307  # Starting from the 13th origin (index 12)
+    dest_start_index = 345  # Starting from the 446th destination (index 445)
+
+    for origin_index in range(origin_start_index, len(origins)):
+        for dest_index in range(dest_start_index, len(dests)):
+            print(f"Processing route {origin_index + 1}/{len(origins)} - {dest_index + 1}/{len(dests)}")
+            distance, duration, polyline = google_maps.get_distance_time(
+                origins[origin_index]['latitude'], origins[origin_index]['longitude'],
+                dests[dest_index]['latitude'], dests[dest_index]['longitude'],
+                travel_mode
+            )
+            RoutesDAO().insert_route(
+                PlacesDAO().read_id_by_location(str(origins[origin_index])),
+                PlacesDAO().read_id_by_location(str(dests[dest_index])),
+                distance, duration, polyline
+            )
+            time.sleep(1)
+        # Reset destination index to 0 after the first run of the inner loop
+        dest_start_index = 0
 
 if __name__ == "__main__":
     main()
