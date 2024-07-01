@@ -1,0 +1,4 @@
+*.pyc
+__pycache__/
+data/processed_data.pkl
+models/tour_guide_model.h5
