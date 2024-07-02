@@ -1,27 +1,24 @@
 import numpy as np
-import pandas as pd
 
 
-def generate_training_data(routes_df):
-    sequences = []
-    next_destinations = []
+def generate_training_data(routes_df, encoded_types, sequence_length=10):
+    X = []
+    y = []
 
-    for origin in routes_df['originId'].unique():
-        subset = routes_df[routes_df['originId'] == origin]
-        if len(subset) < 2:
-            continue
+    # Combine numerical features and encoded types to ensure the correct input dimension
+    feature_columns = ['distanceMeters', 'durationMinutes', 'rating', 'userRatingCount'] + list(encoded_types.columns)
 
-        for i in range(len(subset) - 1):
-            seq = subset.iloc[:i + 1][['distanceMeters', 'durationMinutes', 'rating', 'userRatingCount']].values
-            next_dest = subset.iloc[i + 1]['destId']
-            sequences.append(seq)
-            next_destinations.append(next_dest)
+    for i in range(len(routes_df) - sequence_length):
+        seq_X = routes_df.iloc[i:i + sequence_length][feature_columns]
+        seq_y = routes_df.iloc[i + sequence_length][['distanceMeters', 'durationMinutes', 'rating', 'userRatingCount']]
 
-    X = np.array([np.pad(seq, ((0, 10 - len(seq)), (0, 0)), 'constant') for seq in sequences])
-    y = pd.Series(next_destinations).astype('category').cat.codes.values
+        X.append(seq_X.values)
+        y.append(seq_y.values)
+
+    X = np.array(X)
+    y = np.array(y)
 
     return X, y
-
 
 def prepare_prediction_data(df, scaler):
     df['durationMinutes'] = df['duration'].apply(lambda x: int(x.split()[0]) if 'min' in x else int(x.split()[0]) * 60)

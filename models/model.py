@@ -1,11 +1,11 @@
 from keras import Sequential
-from keras.src.layers import LSTM, Dense
+from keras.src.layers import LSTM, Dense, Dropout
 
 
-def create_model(input_dim):
+def create_model(input_dim, num_features):
     model = Sequential()
-    model.add(LSTM(128, input_shape=(None, input_dim), return_sequences=True))
-    model.add(LSTM(128))
-    model.add(Dense(700, activation='softmax'))  # Output layer representing 700 possible locations
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.add(LSTM(50, activation='relu', input_shape=(None, input_dim)))
+    model.add(Dropout(0.2))
+    model.add(Dense(num_features, activation='linear'))  # Output layer for numerical features with linear activation
+    model.compile(optimizer='adam', loss='mean_squared_error')  # Use mean squared error for regression
     return model
